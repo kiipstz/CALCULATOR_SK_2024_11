@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>МИНИМАЛНА ЦЕНА НА ПРОЕКТИРАНЕ ПО ЧАСР КОНСТРУКТИВНА</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+    <style>
+        .card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            margin: 2rem auto;
+            max-width: 42rem;
+            padding: 1.5rem;
+        }
+        .input-group {
+            margin-bottom: 1rem;
+        }
+        .input-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        .select-input, .number-input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.375rem;
+            margin-bottom: 1rem;
+        }
+        .price-summary {
+            background: #f9fafb;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-top: 1.5rem;
+        }
+        .error-message {
+            color: red;
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4">
+    <div class="card">
+        <h1 class="text-xl font-bold mb-4">МИНИМАЛНА ЦЕНА НА ПРОЕКТИРАНЕ ПО ЧАСТ КОНСТРУКТИВНА</h1>
+        
+        <!-- Project Type and Area -->
+        <div class="input-group">
+            <label class="input-label">Вид строителен проект</label>
+            <select id="projectType" class="select-input"></select>
+        </div>
+        <div id="areaInput" class="input-group" style="display: none;">
+            <label class="input-label">Площ (м²)</label>
+            <input type="number" id="area" class="number-input" min="0" placeholder="Въведете площ">
+        </div>
+        
+        <!-- Additional Inputs and Options -->
+        <div id="wallSectionsGroup" class="input-group" style="display: none;">
+            <div class="mb-4">
+                <label class="input-label">Брой сечения</label>
+                <input type="number" id="wallSections" class="number-input" min="1" value="1">
+            </div>
+            <div>
+                <label class="input-label">Допълнителна дължина (м)</label>
+                <input type="number" id="additionalLength" class="number-input" min="0" value="0">
+            </div>
+        </div>
+        
+        <div id="craneCheckbox" class="checkbox-group" style="display: none;">
+            <input type="checkbox" id="hasCrane">
+            <label>Добави 1,5 лв/м² за хале с кран</label>
+        </div>
+        
+        <div id="complexityGroup" class="input-group">
+            <div class="checkbox-group">
+                <input type="checkbox" id="hasComplexity">
+                <label>Добавка при сложна геометрия или терен</label>
+            </div>
+            <div id="complexityPercentageGroup" style="display: none;">
+                <input type="number" id="complexityPercentage" class="number-input" min="0" max="100" placeholder="Процент добавка">
+            </div>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="includeSupervision">
+            <label>Включи авторски надзор (15%)</label>
+        </div>
+        
+        <div id="errorMessage" class="error-message" style="display: none;">
+            ВЪВЕДИ СЪОТВЕТСТВАЩА НА КАТЕГОРИЯТА КВАДРАТУРА
+        </div>
+
+        <div class="price-summary">
+            <div class="flex justify-between mb-2">
+                <span>Базова цена:</span>
+                <span id="basePrice" class="font-medium">0.00 лв.</span>
+            </div>
+            <div id="supervisionPrice" class="flex justify-between mb-2" style="display: none;">
+                <span>Авторски надзор:</span>
+                <span id="supervisionPriceValue" class="font-medium">0.00 лв.</span>
+            </div>
+            <div class="flex justify-between text-lg font-bold pt-2 border-t">
+                <span>Крайна цена:</span>
+                <span id="totalPrice">0.00 лв.</span>
+            </div>
+            <div class="text-sm text-gray-500 mt-2">
+                *Всички цени са без включен ДДС
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const constructionTypes = {
+            'I.1': { name: 'Становище само с текстова част (делба)', basePrice: 300, type: 'fixed' },
+            'I.3': { name: 'Становище за фотоволтаични централи до 1 MWh', basePrice: 1800, type: 'fixed' },
+            'II.1': { name: 'Еднофамилни жилищни сгради-стоманобетон (до 100 м²)', basePrice: 1500, type: 'fixed' },
+            'II.2': { name: 'Еднофамилни жилищни сгради-стоманобетон (100-200 м²)', basePrice: 2000, type: 'fixed' },
+            'II.3': { name: 'Еднофамилни жилищни сгради-стоманобетон (над 200 м²)', basePrice: 10, type: 'per_m2', minArea: 200 },
+            'III.1': { name: 'Еднофамилни жилищни сгради-дървени/стоманени (до 100 м²)', basePrice: 2000, type: 'fixed' },
+            'III.2': { name: 'Еднофамилни жилищни сгради-дървени/стоманени (100-200 м²)', basePrice: 2500, type: 'fixed' },
+            'III.3': { name: 'Еднофамилни жилищни сгради-дървени/стоманени (над 200 м²)', basePrice: 12.5, type: 'per_m2', minArea: 200 },
+            'IV.1': { name: 'Многофамилни жилищни сгради-стоманобетон (500-1000 м²)', basePrice: 9, type: 'per_m2', minArea: 500, maxArea: 1000 },
+            'IV.2': { name: 'Многофамилни жилищни сгради-стоманобетон (1000-3000 м²)', basePrice: 8, type: 'per_m2', minArea: 1000, maxArea: 3000 },
+            'IV.3': { name: 'Многофамилни жилищни сгради-стоманобетон (над 3000 м²)', basePrice: 7, type: 'per_m2', minArea: 3000 },
+            'V.1': { name: 'Стоманени конструкции - складово хале (до 600 м²)', basePrice: 12, type: 'per_m2', maxArea: 600 },
+            'V.2': { name: 'Стоманени конструкции - складово хале (600-1200 м²)', basePrice: 10, type: 'per_m2', minArea: 600, maxArea: 1200 },
+            'V.3': { name: 'Стоманени конструкции - складово хале (над 1200 м²)', basePrice: 9, type: 'per_m2', minArea: 1200 },
+            'VI.1': { name: 'Сглобяеми стоманобетонни - складово хале (до 1500 м²)', basePrice: 12, type: 'per_m2', maxArea: 1500 },
+            'VI.2': { name: 'Сглобяеми стоманобетонни - складово хале (над 1500 м²)', basePrice: 10, type: 'per_m2', minArea: 1500 },
+            'VII.1': { name: 'План за безопасност и здраве - Еднофамилни жилищни сгради', basePrice: 250, type: 'fixed' },
+            'VII.2': { name: 'План за безопасност и здраве - Многофамилни жилищни сгради', basePrice: 400, type: 'fixed' },
+            'VII.3': { name: 'План за безопасност и здраве - Събаряне на съществуващи сгради', basePrice: 600, type: 'fixed' },
+            'VIII.1': { name: 'Обследване на съществуващи сгради - Пълно обследване', basePrice: 8, type: 'per_m2' },
+            'X.1': { name: 'Подпорни стени - До 4м височина', basePrice: 500, type: 'retaining_wall' },
+            'X.2': { name: 'Подпорни стени - Над 4м височина', basePrice: 1000, type: 'retaining_wall' }
+        };
+
+        const categoryNames = {
+            'I': 'Становища',
+            'II': 'Еднофамилни жилищни сгради (стоманобетон)',
+            'III': 'Еднофамилни жилищни сгради (дървени/стоманени)',
+            'IV': 'Многофамилни жилищни сгради',
+            'V': 'Стоманени конструкции',
+            'VI': 'Сглобяеми стоманобетонни конструкции',
+            'VII': 'План за безопасност и здраве',
+            'VIII': 'Обследване на съществуващи сгради',
+            'X': 'Подпорни стени'
+        };
+
+        const select = document.getElementById('projectType');
+        select.innerHTML = '<option value="">Изберете вид проект</option>';
+
+        const groupedTypes = {};
+        Object.entries(constructionTypes).forEach(([key, value]) => {
+            const category = key.split('.')[0];
+            if (!groupedTypes[category]) groupedTypes[category] = [];
+            groupedTypes[category].push({ key, ...value });
+        });
+
+        Object.entries(groupedTypes).forEach(([category, types]) => {
+            const group = document.createElement('optgroup');
+            group.label = categoryNames[category] || category;
+            types.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type.key;
+                option.textContent = type.name;
+                group.appendChild(option);
+            });
+            select.appendChild(group);
+        });
+
+        function calculatePrice() {
+            const selectedType = document.getElementById('projectType').value;
+            const type = constructionTypes[selectedType];
+            let area = parseFloat(document.getElementById('area').value) || 0;
+            
+            if (!type) return 0;
+
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.style.display = 'none';
+
+            if ((type.minArea && area < type.minArea) || (type.maxArea && area > type.maxArea)) {
+                errorMessage.style.display = 'block';
+                return 0;
+            }
+
+            let basePrice = type.basePrice;
+
+            if (type.type === 'per_m2') {
+                basePrice *= area;
+            } else if (type.type === 'retaining_wall') {
+                const wallSections = parseInt(document.getElementById('wallSections').value) || 1;
+                const additionalLength = parseFloat(document.getElementById('additionalLength').value) || 0;
+                basePrice *= wallSections;
+                basePrice += basePrice * 0.2 * Math.ceil(additionalLength / 10);
+            }
+
+            const hasCrane = document.getElementById('hasCrane').checked;
+            if (hasCrane && (selectedType.startsWith('V') || selectedType.startsWith('VI'))) {
+                basePrice += area * 1.5;
+            }
+
+            const hasComplexity = document.getElementById('hasComplexity').checked;
+            if (hasComplexity) {
+                const complexityPercentage = parseFloat(document.getElementById('complexityPercentage').value) || 0;
+                basePrice += basePrice * (complexityPercentage / 100);
+            }
+
+            return basePrice;
+        }
+
+        function updatePrices() {
+            const basePrice = calculatePrice();
+            const includeSupervision = document.getElementById('includeSupervision').checked;
+            const supervisionPrice = includeSupervision ? basePrice * 0.15 : 0;
+            const totalPrice = basePrice + supervisionPrice;
+
+            document.getElementById('basePrice').textContent = `${basePrice.toFixed(2)} лв.`;
+            document.getElementById('supervisionPrice').style.display = includeSupervision ? 'flex' : 'none';
+            document.getElementById('supervisionPriceValue').textContent = `${supervisionPrice.toFixed(2)} лв.`;
+            document.getElementById('totalPrice').textContent = `${totalPrice.toFixed(2)} лв.`;
+        }
+
+       document.getElementById('projectType').addEventListener('change', function() {
+    const selectedType = this.value;
+    const type = constructionTypes[selectedType];
+
+    document.getElementById('hasCrane').checked = false;
+    document.getElementById('hasComplexity').checked = false;
+    document.getElementById('includeSupervision').checked = false;
+    document.getElementById('area').value = '';
+    document.getElementById('complexityPercentage').value = '';
+    document.getElementById('complexityPercentageGroup').style.display = 'none';
+    document.getElementById('areaInput').style.display = type?.type === 'per_m2' ? 'block' : 'none';
+    document.getElementById('wallSectionsGroup').style.display = type?.type === 'retaining_wall' ? 'block' : 'none';
+    document.getElementById('complexityGroup').style.display = 'block';
+    
+    // Updated to hide 'craneCheckbox' for categories VII and VIII
+    const isCraneEligible = selectedType.startsWith('V') || selectedType.startsWith('VI');
+    const isExcludedCategory = selectedType.startsWith('VII') || selectedType.startsWith('VIII');
+    document.getElementById('craneCheckbox').style.display = (isCraneEligible && !isExcludedCategory) ? 'flex' : 'none';
+
+    document.getElementById('errorMessage').style.display = 'none';
+
+    updatePrices();
+});
+
+
+        document.getElementById('area').addEventListener('input', updatePrices);
+        ['wallSections', 'additionalLength', 'complexityPercentage'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updatePrices);
+        });
+
+        ['hasCrane', 'hasComplexity', 'includeSupervision'].forEach(id => {
+            document.getElementById(id).addEventListener('change', updatePrices);
+        });
+
+        document.getElementById('hasComplexity').addEventListener('change', function() {
+            document.getElementById('complexityPercentageGroup').style.display = this.checked ? 'block' : 'none';
+        });
+    </script>
+</body>
+</html>
