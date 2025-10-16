@@ -3,264 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>МИНИМАЛНА ЦЕНА НА ПРОЕКТИРАНЕ ПО ЧАСР КОНСТРУКТИВНА</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
-    <style>
-        .card {
-            background: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-            margin: 2rem auto;
-            max-width: 42rem;
-            padding: 1.5rem;
-        }
-        .input-group {
-            margin-bottom: 1rem;
-        }
-        .input-label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-        }
-        .select-input, .number-input {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 0.375rem;
-            margin-bottom: 1rem;
-        }
-        .price-summary {
-            background: #f9fafb;
-            border-radius: 0.375rem;
-            padding: 1rem;
-            margin-top: 1.5rem;
-        }
-        .error-message {
-            color: red;
-            font-weight: bold;
-            margin-top: 1rem;
-        }
-    </style>
+    <title>Калкулатор за проектиране - Част Конструкции (СК)</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gray-100 p-4">
-    <div class="card">
-        <h1 class="text-xl font-bold mb-4">МИНИМАЛНА ЦЕНА НА ПРОЕКТИРАНЕ ПО ЧАСТ КОНСТРУКТИВНА</h1>
-        
-        <!-- Project Type and Area -->
-        <div class="input-group">
-            <label class="input-label">Вид строителен проект</label>
-            <select id="projectType" class="select-input"></select>
-        </div>
-        <div id="areaInput" class="input-group" style="display: none;">
-            <label class="input-label">Площ (м²)</label>
-            <input type="number" id="area" class="number-input" min="0" placeholder="Въведете площ">
-        </div>
-        
-        <!-- Additional Inputs and Options -->
-        <div id="wallSectionsGroup" class="input-group" style="display: none;">
-            <div class="mb-4">
-                <label class="input-label">Брой сечения</label>
-                <input type="number" id="wallSections" class="number-input" min="1" value="1">
-            </div>
-            <div>
-                <label class="input-label">Допълнителна дължина (м)</label>
-                <input type="number" id="additionalLength" class="number-input" min="0" value="0">
-            </div>
-        </div>
-        
-        <div id="craneCheckbox" class="checkbox-group" style="display: none;">
-            <input type="checkbox" id="hasCrane">
-            <label>Добави 1,5 лв/м² за хале с кран</label>
-        </div>
-        
-        <div id="complexityGroup" class="input-group">
-            <div class="checkbox-group">
-                <input type="checkbox" id="hasComplexity">
-                <label>Добавка при сложна геометрия или терен</label>
-            </div>
-            <div id="complexityPercentageGroup" style="display: none;">
-                <input type="number" id="complexityPercentage" class="number-input" min="0" max="100" placeholder="Процент добавка">
-            </div>
-        </div>
+<body class="theme-light">
 
-        <div class="checkbox-group">
-            <input type="checkbox" id="includeSupervision">
-            <label>Включи авторски надзор (15%)</label>
-        </div>
-        
-        <div id="errorMessage" class="error-message" style="display: none;">
-            ВЪВЕДИ СЪОТВЕТСТВАЩА НА КАТЕГОРИЯТА КВАДРАТУРА
-        </div>
+    <button id="theme-toggle" class="action-button theme-toggle-button" title="Превключване на тема">
+        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.106a.75.75 0 010 1.06l-1.591 1.59a.75.75 0 11-1.06-1.061l1.59-1.591a.75.75 0 011.062 0zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5h2.25a.75.75 0 01.75.75zM17.836 17.894a.75.75 0 011.06 0l1.591 1.59a.75.75 0 11-1.06 1.061l-1.59-1.591a.75.75 0 010-1.06zM12 21.75a.75.75 0 01-.75-.75v-2.25a.75.75 0 011.5 0V21a.75.75 0 01-.75-.75zM5.106 17.894a.75.75 0 010-1.06l1.591-1.59a.75.75 0 111.06 1.061l-1.59 1.591a.75.75 0 01-1.062 0zM3 12a.75.75 0 01.75-.75h2.25a.75.75 0 010 1.5H3.75A.75.75 0 013 12zM6.164 6.106a.75.75 0 01-1.06 0L3.513 4.515a.75.75 0 111.06-1.061l1.591 1.59a.75.75 0 010 1.06z"></path></svg>
+        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 004.472-.948a.75.75 0 01.82.162l.805.806a.75.75 0 01-.162.82a10.488 10.488 0 01-5.051 2.872.75.75 0 01-.635-.412A8.97 8.97 0 0015 15.75a9 9 0 00-5.948-8.528.75.75 0 01-.412-.635A10.488 10.488 0 012.87 1.987l.806.805a.75.75 0 01.82-.162z" clip-rule="evenodd"></path></svg>
+    </button>
+    
+    <h1>Калкулатор за минимална себестойност на проектиране – ЧАСТ КОНСТРУКЦИИ (СК)</h1>
+    
+    <div class="main-container">
+        <div class="calculator-container">
+            <div class="main-content">
+                <div id="mainSection" class="section">
+                    <h2>Основни параметри</h2>
+                    <div class="form-group">
+                        <label for="projectType">Вид строителен проект:</label>
+                        <select id="projectType" class="calc-input"></select>
+                    </div>
+                    <div id="areaInput" class="form-group" style="display: none;">
+                        <label for="area">Площ (м²):</label>
+                        <input type="number" id="area" class="calc-input" min="0" placeholder="Въведете площ">
+                    </div>
+                    <div id="wallSectionsGroup" class="form-group" style="display: none;">
+                        <label>Параметри за подпорни стени:</label>
+                        <input type="number" id="wallSections" class="calc-input" min="1" value="1" title="Брой сечения" placeholder="Брой сечения">
+                        <input type="number" id="additionalLength" class="calc-input" min="0" value="0" title="Допълнителна дължина (м)" placeholder="Доп. дължина (м)" style="margin-top: 5px;">
+                    </div>
+                </div>
+                
+                <div class="total-section">
+                    <h2 id="displayObjectName"></h2>
+                    <h2 id="totalHeader">ОБЩО (€ без ДДС):</h2>
+                    <p id="totalPrice">0.00 €</p>
+                    <pre id="calculationLog">Моля, изберете вид проект.</pre>
+                    <div class="button-group">
+                        <button id="printButton" class="action-button">Принтирай</button>
+                        <button id="exportTxtButton" class="action-button">Експорт (.txt)</button>
+                    </div>
+                </div>
+            </div>
 
-        <div class="price-summary">
-            <div class="flex justify-between mb-2">
-                <span>Базова цена:</span>
-                <span id="basePrice" class="font-medium">0.00 лв.</span>
-            </div>
-            <div id="supervisionPrice" class="flex justify-between mb-2" style="display: none;">
-                <span>Авторски надзор:</span>
-                <span id="supervisionPriceValue" class="font-medium">0.00 лв.</span>
-            </div>
-            <div class="flex justify-between text-lg font-bold pt-2 border-t">
-                <span>Крайна цена:</span>
-                <span id="totalPrice">0.00 лв.</span>
-            </div>
-            <div class="text-sm text-gray-500 mt-2">
-                *Всички цени са без включен ДДС
+            <div class="sidebar">
+                <h3>Проект</h3>
+                <div class="form-group"><label for="objectName">Име на обект:</label><input type="text" id="objectName" class="calc-input" placeholder="напр. Еднофамилна къща в..."></div>
+                <div class="form-group">
+                    <button id="saveButton" class="action-button" title="Запазва калкулацията">Запази</button>
+                    <button id="loadButton" class="action-button" title="Зарежда калкулация">Отвори</button>
+                    <button id="resetButton" class="action-button" title="Изчиства всичко">Изчисти</button>
+                    <input type="file" id="loadInput" accept=".json" style="display: none;">
+                </div>
+                <hr>
+                <h3>Настройки</h3>
+                <div class="form-group"><button id="openTableBtn" class="action-button" style="width: 100%;">Отвори таблица с цени</button></div>
+                <div class="form-group"><label for="currencyDisplay">Валута:</label><select id="currencyDisplay" class="calc-input"><option value="eur">в евро (€)</option><option value="bgn">в лева (лв.)</option><option value="both">в лева и евро</option></select></div>
+                <hr>
+                
+                <!-- *** НОВ ОБГРЪЩАЩ DIV *** -->
+                <div id="coefficientsSection">
+                    <h3>Допълнителни коефициенти</h3>
+                    <div id="craneCheckbox" class="form-group custom-checkbox" style="display: none;"><input type="checkbox" id="hasCrane" class="calc-input"><label for="hasCrane">Хале с кран (+1.00 €/м²)</label></div>
+                    <div class="form-group custom-checkbox"><input type="checkbox" id="hasComplexity" class="calc-input"><label for="hasComplexity">Сложна геометрия/терен</label></div>
+                    <div id="complexityPercentageGroup" class="form-group" style="display: none;"><label for="complexityPercentage">Процент (+%):</label><input type="number" id="complexityPercentage" class="calc-input" min="0" max="100" placeholder="напр. 15"></div>
+                    <div class="form-group custom-checkbox"><input type="checkbox" id="includeSupervision" class="calc-input"><label for="includeSupervision">Авторски надзор (+15%)</label></div>
+                </div>
+
             </div>
         </div>
     </div>
-
-    <script>
-        const constructionTypes = {
-            'I.1': { name: 'Становище само с текстова част (делба)', basePrice: 300, type: 'fixed' },
-            'I.3': { name: 'Становище за фотоволтаични централи до 1 MWh', basePrice: 1800, type: 'fixed' },
-            'II.1': { name: 'Еднофамилни жилищни сгради-стоманобетон (до 100 м²)', basePrice: 1500, type: 'fixed' },
-            'II.2': { name: 'Еднофамилни жилищни сгради-стоманобетон (100-200 м²)', basePrice: 2000, type: 'fixed' },
-            'II.3': { name: 'Еднофамилни жилищни сгради-стоманобетон (над 200 м²)', basePrice: 10, type: 'per_m2', minArea: 200 },
-            'III.1': { name: 'Еднофамилни жилищни сгради-дървени/стоманени (до 100 м²)', basePrice: 2000, type: 'fixed' },
-            'III.2': { name: 'Еднофамилни жилищни сгради-дървени/стоманени (100-200 м²)', basePrice: 2500, type: 'fixed' },
-            'III.3': { name: 'Еднофамилни жилищни сгради-дървени/стоманени (над 200 м²)', basePrice: 12.5, type: 'per_m2', minArea: 200 },
-            'IV.1': { name: 'Многофамилни жилищни сгради-стоманобетон (500-1000 м²)', basePrice: 9, type: 'per_m2', minArea: 500, maxArea: 1000 },
-            'IV.2': { name: 'Многофамилни жилищни сгради-стоманобетон (1000-3000 м²)', basePrice: 8, type: 'per_m2', minArea: 1000, maxArea: 3000 },
-            'IV.3': { name: 'Многофамилни жилищни сгради-стоманобетон (над 3000 м²)', basePrice: 7, type: 'per_m2', minArea: 3000 },
-            'V.1': { name: 'Стоманени конструкции - складово хале (до 600 м²)', basePrice: 12, type: 'per_m2', maxArea: 600 },
-            'V.2': { name: 'Стоманени конструкции - складово хале (600-1200 м²)', basePrice: 10, type: 'per_m2', minArea: 600, maxArea: 1200 },
-            'V.3': { name: 'Стоманени конструкции - складово хале (над 1200 м²)', basePrice: 9, type: 'per_m2', minArea: 1200 },
-            'VI.1': { name: 'Сглобяеми стоманобетонни - складово хале (до 1500 м²)', basePrice: 12, type: 'per_m2', maxArea: 1500 },
-            'VI.2': { name: 'Сглобяеми стоманобетонни - складово хале (над 1500 м²)', basePrice: 10, type: 'per_m2', minArea: 1500 },
-            'VII.1': { name: 'План за безопасност и здраве - Еднофамилни жилищни сгради', basePrice: 250, type: 'fixed' },
-            'VII.2': { name: 'План за безопасност и здраве - Многофамилни жилищни сгради', basePrice: 400, type: 'fixed' },
-            'VII.3': { name: 'План за безопасност и здраве - Събаряне на съществуващи сгради', basePrice: 600, type: 'fixed' },
-            'VIII.1': { name: 'Обследване на съществуващи сгради - Пълно обследване', basePrice: 8, type: 'per_m2' },
-            'X.1': { name: 'Подпорни стени - До 4м височина', basePrice: 500, type: 'retaining_wall' },
-            'X.2': { name: 'Подпорни стени - Над 4м височина', basePrice: 1000, type: 'retaining_wall' }
-        };
-
-        const categoryNames = {
-            'I': 'Становища',
-            'II': 'Еднофамилни жилищни сгради (стоманобетон)',
-            'III': 'Еднофамилни жилищни сгради (дървени/стоманени)',
-            'IV': 'Многофамилни жилищни сгради',
-            'V': 'Стоманени конструкции',
-            'VI': 'Сглобяеми стоманобетонни конструкции',
-            'VII': 'План за безопасност и здраве',
-            'VIII': 'Обследване на съществуващи сгради',
-            'X': 'Подпорни стени'
-        };
-
-        const select = document.getElementById('projectType');
-        select.innerHTML = '<option value="">Изберете вид проект</option>';
-
-        const groupedTypes = {};
-        Object.entries(constructionTypes).forEach(([key, value]) => {
-            const category = key.split('.')[0];
-            if (!groupedTypes[category]) groupedTypes[category] = [];
-            groupedTypes[category].push({ key, ...value });
-        });
-
-        Object.entries(groupedTypes).forEach(([category, types]) => {
-            const group = document.createElement('optgroup');
-            group.label = categoryNames[category] || category;
-            types.forEach(type => {
-                const option = document.createElement('option');
-                option.value = type.key;
-                option.textContent = type.name;
-                group.appendChild(option);
-            });
-            select.appendChild(group);
-        });
-
-        function calculatePrice() {
-            const selectedType = document.getElementById('projectType').value;
-            const type = constructionTypes[selectedType];
-            let area = parseFloat(document.getElementById('area').value) || 0;
-            
-            if (!type) return 0;
-
-            const errorMessage = document.getElementById('errorMessage');
-            errorMessage.style.display = 'none';
-
-            if ((type.minArea && area < type.minArea) || (type.maxArea && area > type.maxArea)) {
-                errorMessage.style.display = 'block';
-                return 0;
-            }
-
-            let basePrice = type.basePrice;
-
-            if (type.type === 'per_m2') {
-                basePrice *= area;
-            } else if (type.type === 'retaining_wall') {
-                const wallSections = parseInt(document.getElementById('wallSections').value) || 1;
-                const additionalLength = parseFloat(document.getElementById('additionalLength').value) || 0;
-                basePrice *= wallSections;
-                basePrice += basePrice * 0.2 * Math.ceil(additionalLength / 10);
-            }
-
-            const hasCrane = document.getElementById('hasCrane').checked;
-            if (hasCrane && (selectedType.startsWith('V') || selectedType.startsWith('VI'))) {
-                basePrice += area * 1.5;
-            }
-
-            const hasComplexity = document.getElementById('hasComplexity').checked;
-            if (hasComplexity) {
-                const complexityPercentage = parseFloat(document.getElementById('complexityPercentage').value) || 0;
-                basePrice += basePrice * (complexityPercentage / 100);
-            }
-
-            return basePrice;
-        }
-
-        function updatePrices() {
-            const basePrice = calculatePrice();
-            const includeSupervision = document.getElementById('includeSupervision').checked;
-            const supervisionPrice = includeSupervision ? basePrice * 0.15 : 0;
-            const totalPrice = basePrice + supervisionPrice;
-
-            document.getElementById('basePrice').textContent = `${basePrice.toFixed(2)} лв.`;
-            document.getElementById('supervisionPrice').style.display = includeSupervision ? 'flex' : 'none';
-            document.getElementById('supervisionPriceValue').textContent = `${supervisionPrice.toFixed(2)} лв.`;
-            document.getElementById('totalPrice').textContent = `${totalPrice.toFixed(2)} лв.`;
-        }
-
-       document.getElementById('projectType').addEventListener('change', function() {
-    const selectedType = this.value;
-    const type = constructionTypes[selectedType];
-
-    document.getElementById('hasCrane').checked = false;
-    document.getElementById('hasComplexity').checked = false;
-    document.getElementById('includeSupervision').checked = false;
-    document.getElementById('area').value = '';
-    document.getElementById('complexityPercentage').value = '';
-    document.getElementById('complexityPercentageGroup').style.display = 'none';
-    document.getElementById('areaInput').style.display = type?.type === 'per_m2' ? 'block' : 'none';
-    document.getElementById('wallSectionsGroup').style.display = type?.type === 'retaining_wall' ? 'block' : 'none';
-    document.getElementById('complexityGroup').style.display = 'block';
     
-    // Updated to hide 'craneCheckbox' for categories VII and VIII
-    const isCraneEligible = selectedType.startsWith('V') || selectedType.startsWith('VI');
-    const isExcludedCategory = selectedType.startsWith('VII') || selectedType.startsWith('VIII');
-    document.getElementById('craneCheckbox').style.display = (isCraneEligible && !isExcludedCategory) ? 'flex' : 'none';
+    <footer>
+         <p class="copyright">© <span id="copyright-year">2025</span> Калкулатор СК. Всички права запазени.</p>
+    </footer>
 
-    document.getElementById('errorMessage').style.display = 'none';
+    <div id="priceTableContainer" style="display: none;"></div>
 
-    updatePrices();
-});
-
-
-        document.getElementById('area').addEventListener('input', updatePrices);
-        ['wallSections', 'additionalLength', 'complexityPercentage'].forEach(id => {
-            document.getElementById(id).addEventListener('input', updatePrices);
-        });
-
-        ['hasCrane', 'hasComplexity', 'includeSupervision'].forEach(id => {
-            document.getElementById(id).addEventListener('change', updatePrices);
-        });
-
-        document.getElementById('hasComplexity').addEventListener('change', function() {
-            document.getElementById('complexityPercentageGroup').style.display = this.checked ? 'block' : 'none';
-        });
-    </script>
+    <script src="js/data.js"></script>
+    <script src="js/calculator.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>
