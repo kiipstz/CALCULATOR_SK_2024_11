@@ -11,14 +11,19 @@ const Calculator = {
         const area = inputs.area;
         const category = inputs.projectType.split('.')[0];
         const isCraneEligible = category === 'V' || category === 'VI';
+        // Променлива, която определя дали площта е нужна за изчислението
         const needsAreaForCalc = type.type === 'per_m2' || isCraneEligible;
         
-        // --- Валидация ---
-        if ((type.minArea || type.maxArea) && area > 0) {
+        // --- Коригирана Валидация ---
+        // Тази проверка за min/max площ трябва да се задейства САМО за типове, които активно използват площта.
+        // За типове с 'fixed' цена, min/maxArea служи само за избор на правилната опция, а не за валидация на скрито поле.
+        if (needsAreaForCalc && (type.minArea || type.maxArea) && area > 0) {
             if ((type.minArea && area < type.minArea) || (type.maxArea && area > type.maxArea)) {
                 return { currentTotal: 0, log: ['НЕВАЛИДНА ПЛОЩ', 'Въведената площ е извън границите за избраната категория.'], error: true };
             }
         }
+        
+        // Тази проверка остава същата
         if (needsAreaForCalc && area <= 0) {
              return { currentTotal: 0, log: ['Моля, въведете площ.'], error: false };
         }

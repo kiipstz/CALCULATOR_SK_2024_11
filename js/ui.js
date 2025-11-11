@@ -7,7 +7,10 @@ const UI = {
         this.elements = {
             projectTypeSelect: document.getElementById('projectType'),
             areaInputContainer: document.getElementById('areaInput'),
+            areaInput: document.getElementById('area'), // Добавен елемент за лесен достъп
             wallSectionsContainer: document.getElementById('wallSectionsGroup'),
+            wallSectionsInput: document.getElementById('wallSections'), // Добавен елемент за лесен достъп
+            additionalLengthInput: document.getElementById('additionalLength'), // Добавен елемент за лесен достъп
             craneCheckboxContainer: document.getElementById('craneCheckbox'),
             complexityGroup: document.getElementById('complexityPercentageGroup'),
             coefficientsSection: document.getElementById('coefficientsSection'),
@@ -94,19 +97,42 @@ const UI = {
     updateInputVisibility(inputs) {
         const type = constructionTypes[inputs.projectType];
         
+        // Ако няма избран проект, скриваме и изчистваме всичко
         if (!type) {
             this.elements.areaInputContainer.style.display = 'none';
+            this.elements.areaInput.value = ''; // <-- FIX: Изчистване на стойността
+
             this.elements.wallSectionsContainer.style.display = 'none';
+            this.elements.wallSectionsInput.value = '1'; // <-- FIX: Връщане на стойност по подразбиране
+            this.elements.additionalLengthInput.value = '0'; // <-- FIX: Връщане на стойност по подразбиране
+
             this.elements.coefficientsSection.style.display = 'none';
             return;
         }
 
         const category = inputs.projectType.split('.')[0];
         const isCraneEligible = category === 'V' || category === 'VI';
+
+        // Логика за показване/скриване на полето за площ
         const needsAreaInput = type.type === 'per_m2' || isCraneEligible;
-        
-        this.elements.areaInputContainer.style.display = needsAreaInput ? 'block' : 'none';
-        this.elements.wallSectionsContainer.style.display = type.type === 'retaining_wall' ? 'block' : 'none';
+        if (needsAreaInput) {
+            this.elements.areaInputContainer.style.display = 'block';
+        } else {
+            this.elements.areaInputContainer.style.display = 'none';
+            this.elements.areaInput.value = ''; // <-- FIX: Изчистваме стойността, когато полето се скрие
+        }
+
+        // Логика за показване/скриване на полетата за подпорни стени
+        const isRetainingWall = type.type === 'retaining_wall';
+        if (isRetainingWall) {
+            this.elements.wallSectionsContainer.style.display = 'block';
+        } else {
+            this.elements.wallSectionsContainer.style.display = 'none';
+            // Не е нужно да изчистваме тук, тъй като стойностите им по подразбиране са ОК,
+            // но за пълнота може да се добавят, ако създават проблеми.
+        }
+
+        // Показване/скриване на останалите контроли
         this.elements.craneCheckboxContainer.style.display = isCraneEligible ? 'block' : 'none';
         this.elements.complexityGroup.style.display = inputs.hasComplexity ? 'block' : 'none';
 
