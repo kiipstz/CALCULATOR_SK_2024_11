@@ -30,8 +30,14 @@
                     </div>
                     <div id="wallSectionsGroup" class="form-group" style="display: none;">
                         <label>Параметри за подпорни стени:</label>
-                        <input type="number" id="wallSections" class="calc-input" min="1" value="1" title="Брой сечения" placeholder="Брой сечения">
-                        <input type="number" id="additionalLength" class="calc-input" min="0" value="0" title="Допълнителна дължина (м)" placeholder="Доп. дължина (м)" style="margin-top: 5px;">
+                        <div class="form-group" style="margin-left: 10px; margin-right: 10px;">
+                            <label for="wallSections">Брой сечения:</label>
+                            <input type="number" id="wallSections" class="calc-input" min="1" value="1" placeholder="Въведете брой">
+                        </div>
+                        <div class="form-group" style="margin-left: 10px; margin-right: 10px; margin-bottom: 0;">
+                            <label for="additionalLength">Доп. дължина (м):</label>
+                            <input type="number" id="additionalLength" class="calc-input" min="0" value="0" placeholder="Въведете дължина">
+                        </div>
                     </div>
                 </div>
                 
